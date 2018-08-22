@@ -71,14 +71,19 @@ var sendMessage = function(chatId, sourceMessageId, message) {
         if (message.startsWith('/')) {
             msg = message.substring(1);
         }
-        msg = msg.replace(/([^\s]+)(ай|ми|ни)(\s|$)/, 'Лучше бы ты сам $1ал ' )
-        msg = msg.replace(/([^\s]+)(ой)(\s|$)/, 'Лучше бы ты сам $1ыл ' )
-        msg = msg.replace(/([^\s]+)(уй)(\s|$)/, 'Лучше бы ты сам $1овал ' )
-        msg = msg.replace(/([^\s]+)(ди)(\s|$)/, 'Лучше бы ты сам $1ёл ' )
-        msg = msg.replace(/([^\s]+)(ей|и)(\s|$)/, 'Лучше бы ты сам $1ил ' )
-        var method = 'sendMessage';
+        if (msg.match(/([^\s]+)(ай|ми|ни)(сь|ся)(\s|$)/)) {
+            msg = msg.replace(/([^\s]+)(ай|ми|ни)(сь|ся)(\s|$)/, 'Лучше бы ты сам $1ал$3 ');
+        } else if (msg.match(/([^\s]+)(ой)(сь|ся)(\s|$)/)) {
+            msg = msg.replace(/([^\s]+)(ой)(сь|ся)(\s|$)/, 'Лучше бы ты сам $1ыл$3 ');
+        } else if (msg.match(/([^\s]+)(уй)(сь|ся)(\s|$)/)) {
+            msg = msg.replace(/([^\s]+)(уй)(сь|ся)(\s|$)/, 'Лучше бы ты сам $1овал$3 ');
+        } else if (msg.match(/([^\s]+)(ди)(сь|ся)(\s|$)/)) {
+            msg = msg.replace(/([^\s]+)(ди)(сь|ся)(\s|$)/, 'Лучше бы ты сам $1ёл$3 ');
+        } else if (msg.match(/([^\s]+)(ей|и)(сь|ся)(\s|$)/)) {
+            msg = msg.replace(/([^\s]+)(ей|и)(сь|ся)(\s|$)/, 'Лучше бы ты сам $1ил$3 ');
+        }
         request.post(
-            baseUrl + method,
+            baseUrl + 'sendMessage',
             {
                 form: {
                     'chat_id': chatId,
