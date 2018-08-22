@@ -106,7 +106,7 @@ var sendMessage = function(chatId, sourceMessageId, message) {
         if (message.startsWith('/')) {
             msg = message.substring(1);
         }
-        if (msg.match(/(не\s)([^\s]+)(ай|ми|ни)(сь|ся)?(\s|$)/)) {
+        if (msg.match(/(не\s)?([^\s]+)(ай|ми|ни)(сь|ся)?(\s|$)/)) {
             msg = msg.replace(/(не\s)?([^\s]+)(ай|ми|ни)(сь|ся)?(\s|$)/, 'Лучше бы ты сам $1$2ал$4 ');
         } else if (msg.match(/(не\s)?([^\s]+)(ой|дь)(сь|ся)?(\s|$)/)) {
             msg = msg.replace(/(не\s)?([^\s]+)(ой|дь)(сь|ся)?(\s|$)/, 'Лучше бы ты сам $1$2ыл$4 ');
