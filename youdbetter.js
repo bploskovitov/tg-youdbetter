@@ -3,6 +3,8 @@ var request = require('request');
 const token = '';
 const baseUrl = 'https://api.telegram.org/bot' + token + '/';
 
+const morpherUrl = '';
+
 
 module.exports = function(context, cb) {
     var res = context;
@@ -106,17 +108,29 @@ var sendMessage = function(chatId, sourceMessageId, message) {
         if (message.startsWith('/')) {
             msg = message.substring(1);
         }
-        if (msg.match(/(не\s)?([^\s]+)(ай|ми|ни)(сь|ся)?(\s|$)/)) {
-            msg = msg.replace(/(не\s)?([^\s]+)(ай|ми|ни)(сь|ся)?(\s|$)/, 'Лучше бы ты сам $1$2ал$4 ');
-        } else if (msg.match(/(не\s)?([^\s]+)(ой|дь)(сь|ся)?(\s|$)/)) {
-            msg = msg.replace(/(не\s)?([^\s]+)(ой|дь)(сь|ся)?(\s|$)/, 'Лучше бы ты сам $1$2ыл$4 ');
-        } else if (msg.match(/(не\s)?([^\s]+)(уй)(сь|ся)?(\s|$)/)) {
-            msg = msg.replace(/(не\s)?([^\s]+)(уй)(сь|ся)?(\s|$)/, 'Лучше бы ты сам $1$2овал$4 ');
-        } else if (msg.match(/(не\s)?([^\s]+)(ди)(сь|ся)?(\s|$)/)) {
-            msg = msg.replace(/(не\s)?([^\s]+)(ди)(сь|ся)?(\s|$)/, 'Лучше бы ты сам $1$2ёл$4 ');
-        } else if (msg.match(/(не\s)?([^\s]+)(ей|и)(сь|ся)?(\s|$)/)) {
-            msg = msg.replace(/(не\s)?([^\s]+)(ей|и)(сь|ся)?(\s|$)/, 'Лучше бы ты сам $1$2ил$4 ');
-        }
+        const tokens = msg.split('\s,.');
+        const additionalTokens = tokens.map(x => {
+            if (x.match(/.*(сь|ся)/)) {
+                return x.replace(/(.*)(сь|ся)/,'$1');
+            }
+            return undefined;
+        })
+            .filter(v=>v!=undefined);
+        tokens.append(additionalTokens);
+        
+        const wordForm = request.post(
+            morpherUrl,
+            {
+                gender: 'femn',
+                words: tokens
+            },
+            (err,response) => {
+                return response;
+            }
+        );
+        tokens = tokens.replace(wordForm.orig, wordForm.modified);
+        
+
         request.post(
             baseUrl + 'sendMessage',
             {
