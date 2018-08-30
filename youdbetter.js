@@ -39,20 +39,6 @@ var mongoObjectId = function () {
         .toLowerCase();
 };
 
-// var getBashOrg = function(q) {
-//     const id = Math.round(Math.random() * 451892);
-//     const url = `https://bash.im/quote/${id}`;
-//     var response = "12";
-//     request.get(url,
-//         (err, resp, body) => {
-//             console.log(JSON.stringify(body))
-//             var xx = resp.send(200, body);
-//             // response = body;
-//             return xx;
-//         });
-//     return response;
-// }
-
 var inlineQuery = function(inline_query) {
     // console.log(`q: ${JSON.stringify(inline_query)}`);
     var tokenized = inline_query.query.split(' ');
@@ -116,7 +102,6 @@ var sendMessage = function(chatId, sourceMessageId, message) {
             return undefined;
         })
             .filter(v=>v!=undefined);
-        tokens.append(additionalTokens);
         
         const wordForm = request.post(
             morpherUrl,
@@ -128,8 +113,10 @@ var sendMessage = function(chatId, sourceMessageId, message) {
                 return response;
             }
         );
-        tokens = tokens.replace(wordForm.orig, wordForm.modified);
-        
+        const pat = wordForm.orig + '(сь|ся)?';
+        const regexp = new RegExp(pat);
+        msg = msg.replace(regexp, wordForm.modified);
+        msg = 'Лучше бы ты сам ' + msg;
 
         request.post(
             baseUrl + 'sendMessage',
