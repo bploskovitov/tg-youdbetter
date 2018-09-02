@@ -11,6 +11,7 @@ module.exports = function(context, cb) {
   if (context.body) {
     var msg;
     var inline_query;
+    // console.log(context.body.message);
     if (context.body.message) {
       msg = context.body.message;
     } else if (context.body.edited_message) {
@@ -102,7 +103,8 @@ var sendMessage = function(chatId, sourceMessageId, message) {
     if (message.startsWith('/')) {
       msg = message.substring(1);
     }
-    const tokens = msg.split('s,.');
+    const tokens = msg.split(/\s/);
+    // console.log(`tokens: ${tokens[0]}`);
     const additionalTokens = tokens
       .map(x => {
         if (x.match(/.*(сь|ся)/)) {
@@ -113,21 +115,25 @@ var sendMessage = function(chatId, sourceMessageId, message) {
       .filter(v => v != undefined);
 
     const data = {
-      gender: 'femn',
+      // gender: 'femn',
+      gender: 'masc',
       words: tokens,
     };
+
+    // console.log(`sent: ${JSON.stringify(data)}`);
 
     var wordForm = Promise.resolve(
       request.post(
         {
           url: morpherUrl,
-          json: data,
+          body: JSON.stringify(data),
+          headers: {'Content-Type':'application/json; charset=utf-8'}
         },
         (err, resp, body) => {
           if (!err) {
-              console.log(resp);
-              sendReply(body, msg, chatId, sourceMessageId);
-              return body || resp;
+              const dat =  JSON.parse(body);
+              sendReply(dat, msg, chatId, sourceMessageId);
+              return dat || resp;
           }
           return err;
         }
@@ -138,14 +144,17 @@ var sendMessage = function(chatId, sourceMessageId, message) {
 
 var sendReply = function(wordForm, msg, chatId, sourceMessageId) {
 //   console.log(`wordForm: ${JSON.stringify(wordForm)}`);
-  console.log(`${wordForm} ${msg}, ${chatId}, ${sourceMessageId}`);
+  // console.log(`${JSON.stringify(wordForm)} ${msg}, ${chatId}, ${sourceMessageId}`);
   const pat = wordForm.orig + '(сь|ся)?';
   const regexp = new RegExp(pat);
   msg = msg.replace(regexp, wordForm.modified);
   msg = 'Лучше бы ты сам ' + msg;
 
+  console.log(`msg: ${msg}`);
+
   request.post(
     baseUrl + 'sendMessage',
+
     {
       form: {
         chat_id: chatId,
@@ -159,3 +168,34 @@ var sendReply = function(wordForm, msg, chatId, sourceMessageId) {
     }
   );
 };
+        message_id: sourceMessageId,
+        text: msg,
+      },
+    },
+    (err, response) => {
+      return response;
+    }
+  );
+};
+        message_id: sourceMessageId,
+        text: msg,
+      },
+    },
+    (err, response) => {
+      return response;
+    }
+  );
+};
+        message_id: sourceMessageId,
+        text: msg,
+      },
+    },
+    (err, response) => {
+      return response;
+    }
+  );
+};
+
+
+// const msg = 'погладь кота'
+// sendMessage( '-255195171', '1061', msg);
