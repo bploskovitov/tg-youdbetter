@@ -112,8 +112,11 @@ var sendMessage = function(chatId, sourceMessageId, message) {
         }
         return undefined;
       })
-      .filter(v => v != undefined);
-
+      .filter(v => v != undefined)
+      .map(x => {
+        tokens.push(x);
+      });
+    console.log(`tokens: ${tokens}`);
     const data = {
       // gender: 'femn',
       gender: 'masc',
@@ -145,12 +148,22 @@ var sendMessage = function(chatId, sourceMessageId, message) {
 var sendReply = function(wordForm, msg, chatId, sourceMessageId) {
 //   console.log(`wordForm: ${JSON.stringify(wordForm)}`);
   // console.log(`${JSON.stringify(wordForm)} ${msg}, ${chatId}, ${sourceMessageId}`);
-  const pat = wordForm.orig + '(сь|ся)?';
-  const regexp = new RegExp(pat);
-  msg = msg.replace(regexp, wordForm.modified);
-  msg = 'Лучше бы ты сам ' + msg;
-
-  console.log(`msg: ${msg}`);
+  if (wordForm.orig) {
+    const pat = wordForm.orig + '(сь|ся)?';
+    // console.log(`pat: ${pat} ${JSON.stringify(wordForm)}`);
+    const regexp = new RegExp(pat);
+    var replaceWord = wordForm.modified;
+    const match = regexp.exec(msg);
+    if (replaceWord && match[1]) {
+      replaceWord += 'ся';
+    }
+    const msgnew = msg.replace(regexp, replaceWord);
+    // console.log(`${pat}: ${msg} -> ${msgnew}`);
+    msg = 'Лучше бы ты сам ' + msgnew;
+  } else {
+    msg = 'Знаешь, давай без меня';
+  }
+  // console.log(`msg: ${msg}`);
 
   request.post(
     baseUrl + 'sendMessage',
@@ -168,34 +181,3 @@ var sendReply = function(wordForm, msg, chatId, sourceMessageId) {
     }
   );
 };
-        message_id: sourceMessageId,
-        text: msg,
-      },
-    },
-    (err, response) => {
-      return response;
-    }
-  );
-};
-        message_id: sourceMessageId,
-        text: msg,
-      },
-    },
-    (err, response) => {
-      return response;
-    }
-  );
-};
-        message_id: sourceMessageId,
-        text: msg,
-      },
-    },
-    (err, response) => {
-      return response;
-    }
-  );
-};
-
-
-// const msg = 'погладь кота'
-// sendMessage( '-255195171', '1061', msg);
